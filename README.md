@@ -55,11 +55,18 @@ NVIDIA and Intel graphics. No install, no dependencies, no binary.
 ```
 
 `block`, `unblock` and `restore` change machine policy, so they prompt for elevation and
-relaunch themselves. On a machine with more than one GPU, pick one with `-Device`:
+relaunch themselves.
+
+On a machine with more than one GPU, name the one you mean. Any of these work, and the match
+is a case-insensitive substring of the adapter name:
 
 ```powershell
+.\DriverPin.ps1 block "9070 XT"
+.\DriverPin.ps1 block AMD Radeon RX 9070 XT
 .\DriverPin.ps1 block -Device "9070 XT"
 ```
+
+Run it without a name and it lists your adapters as ready-to-copy commands.
 
 If PowerShell refuses to run the script, it is the execution policy, not DriverPin:
 

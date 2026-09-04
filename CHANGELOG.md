@@ -18,6 +18,9 @@ Initial release.
 - `unblock` command. Suspends the block without discarding the deny list, so a vendor
   installer can run.
 - `restore` command. Removes all driver-blocking policy and unhides driver updates.
-- GPU detection for AMD, NVIDIA and Intel, with `-Device` to select one adapter on a
-  multi-GPU machine.
+- GPU detection for AMD, NVIDIA and Intel. On a multi-GPU machine the adapter can be named
+  positionally, quoted or as bare words, or with `-Device`. Matching is a case-insensitive
+  substring of the adapter name.
+- Ambiguous or unmatched device names list the available adapters as ready-to-copy commands
+  rather than describing the flag to use.
 - Automatic elevation for the commands that change policy.

@@ -39,10 +39,20 @@ param(
     [ValidateSet('status', 'block', 'unblock', 'restore')]
     [string]$Action = 'status',
 
+    # The adapter name, given positionally. Takes a quoted string or bare words,
+    # so all three of these do the same thing:
+    #   .\DriverPin.ps1 block "9070 XT"
+    #   .\DriverPin.ps1 block AMD Radeon RX 9070 XT
+    #   .\DriverPin.ps1 block -Device "9070 XT"
+    [Parameter(Position = 1, ValueFromRemainingArguments = $true)]
+    [string[]]$Target,
+
     [string]$Device,
     [switch]$SkipUpdateCheck,
     [switch]$Force
 )
+
+if (-not $Device -and $Target) { $Device = ($Target -join ' ').Trim() }
 
 $ErrorActionPreference = 'Stop'
 $script:Version = '1.0.0'
@@ -129,9 +139,11 @@ function Get-TargetGpu {
     if ($Device) {
         $filtered = $devices | Where-Object { $_.FriendlyName -like "*$Device*" }
         if (-not $filtered) {
-            Write-Err2 "No display adapter matched '$Device'. Found:"
-            $devices | ForEach-Object { Write-Info "  - $($_.FriendlyName)" }
-            throw "No matching device."
+            Write-Err2 "No display adapter matched '$Device'. Available:"
+            Write-Host ""
+            $devices | ForEach-Object { Write-Info "  .\DriverPin.ps1 $Action ""$($_.FriendlyName)""" }
+            Write-Host ""
+            throw "No adapter matched '$Device'."
         }
         $devices = $filtered
     }
@@ -333,8 +345,11 @@ function Invoke-Block {
     # rejected without making the user approve a UAC prompt first.
     $gpus = @(Get-TargetGpu)
     if ($gpus.Count -gt 1 -and -not $Force) {
-        Write-Err2 "Found $($gpus.Count) display adapters. Narrow it with -Device, or pass -Force to pin all of them."
-        $gpus | ForEach-Object { Write-Info "  - $($_.Name)" }
+        Write-Err2 "Found $($gpus.Count) display adapters. Say which one, by copying a line below:"
+        Write-Host ""
+        foreach ($g in $gpus) { Write-Info "  .\DriverPin.ps1 $Action ""$($g.Name)""" }
+        Write-Host ""
+        Write-Info "Or pass -Force to pin every adapter listed above."
         return
     }
 
